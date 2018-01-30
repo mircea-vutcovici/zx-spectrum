@@ -2,14 +2,14 @@
 ; Bresenham's Algorithm for drawing circles in Zilog Z80 assembler
 ; Grafica pe calculator in limbaj PASCAL si "C" Editora Tehnica 1992
 
-XC      EQU 0x10
-YC      EQU 0x10
-RC      EQU 0x10 
+XC      EQU 0x50
+YC      EQU 0x70
+RC      EQU 0x7
 
 MAIN:
         ORG     $
-        DI
-        PUSH    AF
+        DI                      ; Disable the interrupts because we are using the alternative registers
+        PUSH    AF              ; Save all registers on stack
         PUSH    BC
         PUSH    DE
         PUSH    HL
@@ -19,11 +19,12 @@ MAIN:
         PUSH    BC
         PUSH    DE
         PUSH    HL
-        LD      H, XC
+        LD      H, XC           ; Prepare the input for the circle function
         LD      L, YC
         LD      A, RC
-        CALL    CIRCLE
-        POP     HL
+        CALL    CIRCLE          ; Call the circle function
+        ;CALL   PLOT1
+        POP     HL              ; Restore registers
         POP     DE
         POP     BC
         POP     AF
@@ -33,7 +34,7 @@ MAIN:
         POP     DE
         POP     BC
         POP     AF
-        EI
+        EI                      ; Enable the interupts
         RET
 
 CIRCLE:
@@ -43,52 +44,52 @@ CIRCLE:
         ;           BC used in PLOT1
         ;           AF, A'F' used everywhere
         EX      AF, AF'
-        LD      A, 175           ; Yc <-- 175 - Yc
+        LD      A, 175          ; Yc <-- 175 - Yc
         SUB     L
-        RET     C                 ; if Yc > 175 return
+        RET     C               ; if Yc > 175 return
         LD      L, A
         EX      AF, AF'
 
 PAS1:
-        SUB     H                 ; X2 <-- Xc - R
+        SUB     H               ; X2 <-- Xc - R
         NEG
         LD      D, A
 
-        NEG                        ; reloading A with called value
+        NEG                     ; reloading A with called value
         ADD     A, H
-        LD      C, A             ; saving A to C
+        LD      C, A            ; saving A to C
 
-        ADD     A, H             ; X1 <-- Xc + R
+        ADD     A, H            ; X1 <-- Xc + R
         LD      H, A
 
-        LD      A, C             ; reloading A
+        LD      A, C            ; reloading A
 
-        LD      E, L             ; Y1 <-- Yc     Y2 <-- Yc
+        LD      E, L            ; Y1 <-- Yc     Y2 <-- Yc
 
         EXX
         CALL    PLOT
 
-        LD      C, A             ;    .
-        SLA     C                ;    .  u <-- 2*R
-        LD      B, 0    ; B <-- Cy    .
-        RL      B       ;             .
+        LD      C, A            ;   .
+        SLA     C               ;   .  u <-- 2*R
+        LD      B, 0    ; B <-- Cy  .
+        RL      B       ;           .
 
-        LD      DE, 0            ; v <-- 0
+        LD      DE, 0           ; v <-- 0
 
-        NEG                        ; s <-- 1 - R
+        NEG                     ; s <-- 1 - R
         INC     A
         LD      L, A
-        LD      H, 0
-        RL      H
+        LD      H, 0    ; H <-- Cy
+        RL      H       ;
 
 PAS2:
         EXX
-        INC     L                 ; Y1 <-- Y1 + 1
-        DEC     E                 ; Y2 <-- Y2 - 1
+        INC     L               ; Y1 <-- Y1 + 1
+        DEC     E               ; Y2 <-- Y2 - 1
         EXX
-        INC     DE                ; v <-- v + 2
+        INC     DE              ; v <-- v + 2
         INC     DE
-        LD      A, E             ; if u = v jump to PAS9
+        LD      A, E            ; if u = v jump to PAS9
         CP      C
         JR      NZ, PAS3
         LD      A, D
@@ -97,27 +98,27 @@ PAS2:
 
 PAS3:
         CALL    PLOT
-        SCF                        ; s <-- s + v + 1
+        SCF                     ; s <-- s + v + 1
         ADC     HL, DE
-        LD      A, H             ; if s < 0 goto PAS2
+        LD      A, H            ; if s < 0 goto PAS2
         RLCA
         JR      C, PAS2
 
 PAS4:
         EXX
-        DEC     H                 ; X1 <-- X1 - 1
-        INC     L                 ; Y1 <-- Y1 + 1
-        INC     D                 ; X2 <-- X2 + 1
-        DEC     E                 ; Y2 <-- Y2 - 1
+        DEC     H               ; X1 <-- X1 - 1
+        INC     L               ; Y1 <-- Y1 + 1
+        INC     D               ; X2 <-- X2 + 1
+        DEC     E               ; Y2 <-- Y2 - 1
         EXX
-        DEC     BC                ; u <-- u - 2
+        DEC     BC              ; u <-- u - 2
         DEC     BC
-        INC     DE                ; v <-- v + 2
+        INC     DE              ; v <-- v + 2
         INC     DE
-        SCF                        ; s <-- s - u
+        SCF                     ; s <-- s - u
         CCF
         SBC     HL, BC
-        LD      A, D             ; if u > v goto PAS3
+        LD      A, D            ; if u > v goto PAS3
         CP      B
         JR      C, PAS3
         JR      NZ, PAS5
@@ -126,7 +127,7 @@ PAS4:
         JR      C, PAS3
 
 PAS5:
-        LD      A, B             ; if u = v goto PAS8
+        LD      A, B            ; if u = v goto PAS8
         CP      D
         JR      NZ, LOOP1
         LD      A, C
@@ -134,24 +135,24 @@ PAS5:
         JR      Z, PAS8
 
 LOOP1:
-        INC     HL                ; s <-- s + 1
-        JR      PAS8             ; goto PAS8
+        INC     HL              ; s <-- s + 1
+        JR      PAS8            ; goto PAS8
 
 PAS6:
         EXX
-        DEC     H                 ; X1 <-- X1 - 1
-        INC     L                 ; Y1 <-- Y1 + 1
-        INC     D                 ; X2 <-- X2 + 1
-        DEC     E                 ; Y2 <-- Y2 - 1
+        DEC     H               ; X1 <-- X1 - 1
+        INC     L               ; Y1 <-- Y1 + 1
+        INC     D               ; X2 <-- X2 + 1
+        DEC     E               ; Y2 <-- Y2 - 1
         EXX
-        DEC     BC                ; u <-- u - 2
+        DEC     BC              ; u <-- u - 2
         DEC     BC
-        INC     DE                ; v <-- v+2
+        INC     DE              ; v <-- v+2
         INC     DE
-        ADD     HL, DE           ; s <-- s + v
+        ADD     HL, DE          ; s <-- s + v
 
 PAS7:
-        SCF                        ; s <-- s - u
+        SCF                     ; s <-- s - u
         CCF
         SBC     HL, BC
 
@@ -159,25 +160,25 @@ PAS8:
         CALL    PLOT
 
 PAS9:
-        INC     HL                ; s <-- s + 1
-        LD      A, H             ; if s < 0 goto PAS6
+        INC     HL              ; s <-- s + 1
+        LD      A, H            ; if s < 0 goto PAS6
         RLCA
         JR      C, PAS6
 
 PAS10:
         EXX
-        DEC     H                 ; X1 <-- X1 - 1
-        INC     D                 ; X2 <-- x2 + 1
+        DEC     H               ; X1 <-- X1 - 1
+        INC     D               ; X2 <-- x2 + 1
         EXX
-        DEC     BC                ; u <-- u - 2
+        DEC     BC              ; u <-- u - 2
         DEC     BC
-        LD      A, B             ; if u <> 0 goto PAS7
+        LD      A, B            ; if u <> 0 goto PAS7
         OR      C
         JR      NZ, PAS7
 
 PAS11:
         CALL    PLOT
-        DEC     HL                ; s <-- 1 - s
+        DEC     HL              ; s <-- 1 - s
         LD      A, H
         NEG
         LD      H, A
@@ -187,12 +188,12 @@ PAS11:
 
 PAS12:
         EXX
-        DEC     H                 ; X1 <-- X1 - 1
-        INC     D                 ; X2 <-- X2 + 1
+        DEC     H               ; X1 <-- X1 - 1
+        INC     D               ; X2 <-- X2 + 1
         EXX
-        INC     BC                ; u <-- u + 2
+        INC     BC              ; u <-- u + 2
         INC     BC
-        LD      A, E             ; if u = v goto PAS19
+        LD      A, E            ; if u = v goto PAS19
         CP      C
         JR      NZ, PAS13
         LD      A, D
@@ -201,27 +202,27 @@ PAS12:
 
 PAS13:
         CALL    PLOT
-        SCF                        ; s <-- s + u + 1
+        SCF                     ; s <-- s + u + 1
         ADC     HL, BC
-        LD      A, H             ; if s < 0 goto PAS12
+        LD      A, H            ; if s < 0 goto PAS12
         RLCA
         JR      C, PAS12
 
 PAS14:
         EXX
-        DEC     H                 ; X1 <-- X1 - 1
-        DEC     L                 ; Y1 <-- Y1 - 1
-        INC     D                 ; X2 <-- X2 + 1
-        INC     E                 ; Y2 <-- Y2 + 1
+        DEC     H               ; X1 <-- X1 - 1
+        DEC     L               ; Y1 <-- Y1 - 1
+        INC     D               ; X2 <-- X2 + 1
+        INC     E               ; Y2 <-- Y2 + 1
         EXX
-        INC     BC                ; u <-- u + 2
+        INC     BC              ; u <-- u + 2
         INC     BC
-        DEC     DE                ; v <-- v - 2
+        DEC     DE              ; v <-- v - 2
         DEC     DE
-        SCF                        ; s <-- s - v
+        SCF                     ; s <-- s - v
         CCF
         SBC     HL, DE
-        LD      A, B             ; if u < v goto PAS13
+        LD      A, B            ; if u < v goto PAS13
         CP      D
         JR      C, PAS13
         JR      NZ, PAS15
@@ -230,7 +231,7 @@ PAS14:
         JR      C, PAS13
 
 PAS15:
-        LD      A, E             ; if u = v goto PAS18
+        LD      A, E            ; if u = v goto PAS18
         CP      C
         JR      NZ, LOOP2
         LD      A, D
@@ -238,24 +239,24 @@ PAS15:
         JR      Z, PAS18
 
 LOOP2:
-        INC     HL                ; s <-- s + 1
-        JR      PAS18            ; goto PAS18
+        INC     HL              ; s <-- s + 1
+        JR      PAS18           ; goto PAS18
 
 PAS16:
         EXX
-        DEC     H                 ; X1 <-- X1 - 1
-        DEC     L                 ; Y1 <-- Y1 - 1
-        INC     D                 ; X2 <-- X2 + 1
-        INC     E                 ; Y2 <-- Y2 + 1
+        DEC     H               ; X1 <-- X1 - 1
+        DEC     L               ; Y1 <-- Y1 - 1
+        INC     D               ; X2 <-- X2 + 1
+        INC     E               ; Y2 <-- Y2 + 1
         EXX
-        INC     BC                ; u <-- u + 2
+        INC     BC              ; u <-- u + 2
         INC     BC
-        DEC     DE                ; v <-- v - 2
+        DEC     DE              ; v <-- v - 2
         DEC     DE
-        ADD     HL, BC           ; s <-- s + u
+        ADD     HL, BC          ; s <-- s + u
 
 PAS17:
-        SCF                        ; s <-- s - v
+        SCF                     ; s <-- s - v
         CCF
         SBC     HL, DE
 
@@ -263,24 +264,24 @@ PAS18:
         CALL    PLOT
 
 PAS19:
-        INC     HL                ; s <-- s + 1
-        LD      A, H             ; if s < 0 goto PAS16
+        INC     HL              ; s <-- s + 1
+        LD      A, H            ; if s < 0 goto PAS16
         RLCA
         JR      C, PAS16
 
 PAS20:
         EXX
-        DEC     L                 ; Y1 <-- Y1 - 1
-        INC     E                 ; Y2 <-- Y2 + 1
+        DEC     L               ; Y1 <-- Y1 - 1
+        INC     E               ; Y2 <-- Y2 + 1
         EXX
-        DEC     DE                ; v <-- v - 2
+        DEC     DE              ; v <-- v - 2
         DEC     DE
-        LD      A, D             ; if v <> 0 goto PAS17
+        LD      A, D            ; if v <> 0 goto PAS17
         OR      E
         JR      NZ, PAS17
 
 PAS21:
-        RET                        ; return
+        RET                     ; return
 
 
 ; -------- PLOT two points -----------
@@ -299,42 +300,43 @@ PLOT1:
 ; y: 00 000 000 = page, subpage, displacement
 ; x: 00000 000   = page, displacement
 ; 010 00 000 000 00000 = 010 Ypage Ydisplacement Ysubpage Xpage
-        LD      A, 175
+; Input: H <- X; L <- Y [0 - 175];
+        LD      A, 175          ; Check if 0 <= Y <= 175
         CP      L
-        RET     C
-        LD      A, L
-        AND     0xC0              ;%11000000  ;Ypage
+        RET     C               ; If Y bigger, then return
+        LD      A, L            ; Calculate the memory address of the point. First B
+        AND     0xC0            ;%11000000  ;Ypage
         RRCA
         RRCA
         RRCA
-        OR      0x40              ;%01000000  ; Ydisplacement
+        OR      0x40            ;%01000000  ; Ydisplacement
         LD      B, A
         LD      A, L
-        AND     0x07              ;%00000111  ; Ysubpage
+        AND     0x07            ;%00000111  ; Ysubpage
         OR      B
-        LD      B, A
+        LD      B, A            ; B is calculated
         LD      A, L
-        AND     0x38              ;%00111000  ; Xpage
+        AND     0x38            ;%00111000  ; Xpage
         RLCA
         RLCA
         LD      C, A
         LD      A, H
-        AND     0xF8              ;%11111000  ; Xdisplacement
+        AND     0xF8            ;%11111000  ; Xdisplacement
         RRCA
         RRCA
         RRCA
         OR      C
-        LD      C, A
-        LD      A, H
+        LD      C, A            ; C is calculated
+        LD      A, H            ; Calculating the bit to set at (BC) address.
         CPL
         RLCA
         RLCA
         SLA     A
-        OR      0x62              ;%1100010
+        OR      0xC7            ;%11000111
         LD      (MODIF+1), A
         LD      A, (BC)
 MODIF:  SET     1, A
-        LD      (BC),A
+        LD      (BC),A          ; Draw the pixel.
         RET
 ; -------- PLOT1 end -----------------
 
