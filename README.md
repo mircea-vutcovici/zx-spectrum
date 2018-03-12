@@ -8,3 +8,10 @@ Assemble instructions:
 ```
 pasmo --tzx  DrawCircle.asm DrawCircle.tzx
 ```
+
+```
+10 LOAD "DrawCircle" CODE 30000
+20 RANDOMIZE USR 30000
+SAVE "DrawCircle" LINE 10
+RUN
+```
