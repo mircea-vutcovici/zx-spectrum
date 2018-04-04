@@ -7,7 +7,7 @@ Yc      EQU 70                  ; YC - the vertical position of the center
 Rc      EQU 40                  ; Rc - circle radius
 
 MAIN:
-        ORG     $
+        ORG     30000           ; 0x7530
         DI                      ; Disable the interrupts because we are using the alternative registers
         PUSH    AF              ; Save all registers on stack
         PUSH    BC
