@@ -2,9 +2,9 @@
 ; Bresenham's Algorithm for drawing circles in Zilog Z80 assembler
 ; Grafica pe calculator in limbaj PASCAL si "C" Editora Tehnica 1992
 
-XC      EQU 0x50
-YC      EQU 0x70
-RC      EQU 0x7
+Xc      EQU 50                  ; Xc - the horizontal position of the center
+Yc      EQU 70                  ; YC - the vertical position of the center
+Rc      EQU 40                  ; Rc - circle radius
 
 MAIN:
         ORG     $
