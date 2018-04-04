@@ -19,9 +19,9 @@ MAIN:
         PUSH    BC
         PUSH    DE
         PUSH    HL
-        LD      H, XC           ; Prepare the input for the circle function
-        LD      L, YC
-        LD      A, RC
+        LD      H, Xc           ; Prepare the input for the circle function
+        LD      L, Yc
+        LD      A, Rc
         CALL    CIRCLE          ; Call the circle function
         ;CALL   PLOT1
         POP     HL              ; Restore registers
@@ -46,7 +46,7 @@ CIRCLE:
         EX      AF, AF'
         LD      A, 175          ; Yc <-- 175 - Yc
         SUB     L
-        RET     C               ; if Yc > 175 return
+        RET     C               ; if Yc > 175 return. (throw exception)
         LD      L, A
         EX      AF, AF'
 
@@ -111,20 +111,24 @@ PAS4:
         INC     D               ; X2 <-- X2 + 1
         DEC     E               ; Y2 <-- Y2 - 1
         EXX
+
         DEC     BC              ; u <-- u - 2
         DEC     BC
+
         INC     DE              ; v <-- v + 2
         INC     DE
+
         SCF                     ; s <-- s - u
         CCF
         SBC     HL, BC
+
         LD      A, D            ; if u > v goto PAS3
         CP      B
-        JR      C, PAS3
-        JR      NZ, PAS5
+        JR      C, PAS3         ; if Cary flag set, this means that u > v
+        JR      NZ, PAS5        ; if Zero flag set, this means that u < v
         LD      A, E
         CP      C
-        JR      C, PAS3
+        JR      C, PAS3         ; if Cary flag set, this means that u > v
 
 PAS5:
         LD      A, B            ; if u = v goto PAS8
@@ -287,10 +291,10 @@ PAS21:
 ; -------- PLOT two points -----------
 PLOT:
         EXX
-        CALL    PLOT1
+        CALL    PLOT1           ; plot(x1, y1)
         EX      DE, HL
         CALL    PLOT1
-        EX      DE, HL
+        EX      DE, HL          ; plot(x2, y2)
         EXX
         RET
 ; -------- PLOT end ------------------
