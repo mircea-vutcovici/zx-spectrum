@@ -51,13 +51,12 @@ CIRCLE:
         EX      AF, AF'
 
 PAS1:
+        LD      C, A            ; saving A(R) to C
         SUB     H               ; X2 <-- Xc - R
         NEG
         LD      D, A
 
-        NEG                     ; reloading A with called value
-        ADD     A, H
-        LD      C, A            ; saving A to C
+        LD      A, C            ; reloading A
 
         ADD     A, H            ; X1 <-- Xc + R
         LD      H, A
