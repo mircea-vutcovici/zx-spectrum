@@ -3,13 +3,18 @@ Small programs written for Sinclair ZX Spectrum
 Some of them are in Z80 Assembly. Other in BASIC.
 
 ## DrawCircle.asm
+Install assembler:
+```
+sudo apt install pasmo    # Ubuntu, Debian
+```
+
 Assemble instructions:
 
 ```
 pasmo --tzx  DrawCircle.asm DrawCircle.tzx
 ```
 
-Loader:
+Loader, written in ZX Spectrum Basic:
 
 ```
 10 CLEAR 30000
