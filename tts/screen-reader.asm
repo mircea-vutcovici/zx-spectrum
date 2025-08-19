@@ -10,6 +10,7 @@
         DEFW    ELINE, 0x5C59   ; Address of command being typed in
 
 VOICE:  EQU   ????              ; TODO: Aici trebuie sa fie adresa spre TTS
+; TODO: Missing interrupt vector initialization and IM 2
 
 
 SUBRUTINA:
